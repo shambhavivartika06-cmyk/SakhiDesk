@@ -34,7 +34,13 @@ export async function GET(req: NextRequest) {
 
     const invoices = db.prepare(query).all(...params);
 
-    return NextResponse.json({ success: true, invoices });
+    const mappedInvoices = invoices.map((inv: any) => ({
+      ...inv,
+      payLink: inv.pay_link || inv.payment_url || '',
+      payment_url: inv.payment_url || inv.pay_link || ''
+    }));
+
+    return NextResponse.json({ success: true, invoices: mappedInvoices });
   } catch (error: any) {
     console.error('Error fetching invoices:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

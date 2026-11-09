@@ -21,22 +21,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'This invoice does not have a PayPal invoice ID.' }, { status: 400 });
     }
 
+    // Validation: Check customer email before sending
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!invoice.customer_email || !emailRegex.test(invoice.customer_email.trim())) {
+      return NextResponse.json({
+        success: false,
+        error: 'Customer email is missing or invalid. PayPal requires a valid customer email to send an invoice.'
+      }, { status: 400 });
+    }
+
     // Call PayPal Send API
     const sendResult = await sendPayPalInvoice(invoice.paypal_invoice_id);
 
     const now = new Date().toISOString();
+    const payLink = sendResult.payLink || sendResult.paymentUrl || `https://www.sandbox.paypal.com/invoice/p/#${invoice.paypal_invoice_id}`;
 
     // Update Invoice in DB
     db.prepare(`
       UPDATE invoices SET
         paypal_status = 'SENT',
         payment_url = ?,
+        pay_link = ?,
         sent_at = ?,
         last_synced_at = ?,
         updated_at = ?
       WHERE id = ?
     `).run(
-      sendResult.paymentUrl || invoice.payment_url || `https://www.sandbox.paypal.com/invoice/p/#${invoice.paypal_invoice_id}`,
+      payLink,
+      payLink,
       now,
       now,
       now,
@@ -81,11 +93,14 @@ export async function POST(req: NextRequest) {
       success: true,
       message: 'Invoice sent successfully through PayPal Sandbox!',
       status: 'SENT',
-      paymentUrl: sendResult.paymentUrl,
+      payLink,
+      paymentUrl: payLink,
       invoice: {
         ...invoice,
         paypal_status: 'SENT',
-        payment_url: sendResult.paymentUrl
+        payment_url: payLink,
+        pay_link: payLink,
+        payLink
       }
     });
   } catch (error: any) {
@@ -93,6 +108,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to send PayPal invoice.'
-    }, { status: 500 });
+    }, { status: 400 });
   }
 }

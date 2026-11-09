@@ -40,12 +40,14 @@ export async function GET(
       UPDATE invoices SET
         paypal_status = ?,
         payment_url = COALESCE(?, payment_url),
+        pay_link = COALESCE(?, pay_link),
         last_synced_at = ?,
         updated_at = ?
       WHERE id = ?
     `).run(
       currentStatus,
-      details.paymentUrl || null,
+      details.payLink || details.paymentUrl || null,
+      details.payLink || details.paymentUrl || null,
       now,
       now,
       invoice.id
@@ -102,7 +104,8 @@ export async function GET(
       currency: details.currency,
       paidAmount: details.paidAmount,
       dueAmount: details.dueAmount,
-      paymentUrl: details.paymentUrl,
+      payLink: details.payLink || details.paymentUrl,
+      paymentUrl: details.payLink || details.paymentUrl,
       lastSyncedAt: now
     });
   } catch (error: any) {

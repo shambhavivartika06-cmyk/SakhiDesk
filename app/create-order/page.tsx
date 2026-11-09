@@ -251,6 +251,15 @@ export default function CreateOrderPage() {
     setIsCreatingInvoice(true);
     setErrorMessage(null);
 
+    // Validate customer email before calling PayPal API
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailToTest = (confirmedOrder.customer_email || customerEmail || '').trim();
+    if (!emailToTest || !emailRegex.test(emailToTest)) {
+      setErrorMessage('Customer email is missing or invalid. PayPal requires a valid customer email (e.g. buyer@example.com) to generate an invoice.');
+      setIsCreatingInvoice(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/paypal/create-invoice', {
         method: 'POST',
@@ -275,6 +284,7 @@ export default function CreateOrderPage() {
   const handleSendInvoice = async () => {
     if (!invoiceResult?.id && !invoiceResult?.paypal_invoice_id) return;
     setIsCreatingInvoice(true);
+    setErrorMessage(null);
 
     try {
       const invId = invoiceResult.paypal_invoice_id || invoiceResult.id;
@@ -289,10 +299,11 @@ export default function CreateOrderPage() {
         throw new Error(data.error || 'Failed to send invoice via PayPal.');
       }
 
-      alert('PayPal invoice sent successfully! Status is now SENT. Payment URL generated.');
+      const activePayLink = data.payLink || data.paymentUrl;
+      alert(`PayPal invoice sent successfully! Status is now SENT.\nPay Link: ${activePayLink}`);
       router.push('/invoices');
     } catch (err: any) {
-      alert('Error sending invoice: ' + err.message);
+      setErrorMessage(err.message || 'Failed to send invoice via PayPal.');
     } finally {
       setIsCreatingInvoice(false);
     }
@@ -837,6 +848,14 @@ export default function CreateOrderPage() {
               <StatusBadge status={confirmedOrder.status} />
             </div>
           </div>
+
+          {/* Real Error Message Display */}
+          {errorMessage && (
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium">{errorMessage}</div>
+            </div>
+          )}
 
           {/* Real PayPal Sandbox Invoicing Action */}
           {!invoiceResult ? (

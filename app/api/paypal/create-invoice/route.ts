@@ -28,8 +28,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Validation
-    if (!order.customer_email || !order.customer_email.includes('@')) {
+    // Validation: Strict email check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!order.customer_email || !emailRegex.test(order.customer_email.trim())) {
       return NextResponse.json({
         success: false,
         error: 'Customer email is missing or invalid. Please update the customer email in the order before creating a PayPal invoice.'
@@ -51,8 +52,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Get seller details
+    // Get seller details from Settings / DB
     const seller = db.prepare('SELECT * FROM sellers LIMIT 1').get() as any;
+
+    // Read merchant email from Settings or env - NEVER hardcode it
+    const merchantEmail = (process.env.PAYPAL_MERCHANT_EMAIL || process.env.MERCHANT_EMAIL || seller?.email || '').trim();
 
     // Call PayPal Sandbox Invoicing API
     const paypalResult = await createPayPalInvoice({
@@ -60,7 +64,7 @@ export async function POST(req: NextRequest) {
       invoicer: {
         name: seller ? seller.name : 'Sakhi Boutique',
         businessName: seller ? seller.business_name : 'SakhiDesk Handmade Studio',
-        email: seller ? seller.email : 'sb-merchant@business.example.com',
+        email: merchantEmail || undefined,
         phone: seller ? seller.phone : undefined
       },
       recipient: {
@@ -144,6 +148,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create PayPal invoice. Please verify your PayPal Sandbox credentials.'
-    }, { status: 500 });
+    }, { status: 400 });
   }
 }

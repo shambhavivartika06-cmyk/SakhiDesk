@@ -28,6 +28,7 @@ interface Invoice {
   paypal_invoice_id: string;
   paypal_status: string;
   payment_url: string;
+  payLink?: string;
   amount: number;
   currency: string;
   notes: string;
@@ -86,9 +87,20 @@ export default function InvoicesPage() {
       });
 
       // Update in state
-      setInvoices(prev => prev.map(inv => (inv.id === invoice.id ? { ...inv, paypal_status: data.status, payment_url: data.paymentUrl || inv.payment_url } : inv)));
+      const updatedPayLink = data.payLink || data.paymentUrl || invoice.payLink || invoice.payment_url;
+      setInvoices(prev => prev.map(inv => (inv.id === invoice.id ? {
+        ...inv,
+        paypal_status: data.status,
+        payment_url: updatedPayLink,
+        payLink: updatedPayLink
+      } : inv)));
       if (selectedInvoice?.id === invoice.id) {
-        setSelectedInvoice(prev => prev ? { ...prev, paypal_status: data.status } : null);
+        setSelectedInvoice(prev => prev ? {
+          ...prev,
+          paypal_status: data.status,
+          payment_url: updatedPayLink,
+          payLink: updatedPayLink
+        } : null);
       }
     } catch (err: any) {
       setActionMessage({
@@ -105,6 +117,17 @@ export default function InvoicesPage() {
     setSyncingId(invoice.id);
     setActionMessage(null);
 
+    // Validate customer email before calling PayPal
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!invoice.customer_email || !emailRegex.test(invoice.customer_email.trim())) {
+      setActionMessage({
+        type: 'error',
+        text: 'Customer email is missing or invalid. PayPal requires a valid customer email (e.g. buyer@example.com) to send an invoice.'
+      });
+      setSyncingId(null);
+      return;
+    }
+
     try {
       const res = await fetch('/api/paypal/send-invoice', {
         method: 'POST',
@@ -117,9 +140,10 @@ export default function InvoicesPage() {
         throw new Error(data.error || 'Failed to send invoice');
       }
 
+      const activePayLink = data.payLink || data.paymentUrl;
       setActionMessage({
         type: 'success',
-        text: `Invoice #${invoice.invoice_number} sent via PayPal! Customer can now pay via sandbox payment URL.`
+        text: `Invoice #${invoice.invoice_number} sent via PayPal! Live Pay Link generated.`
       });
 
       fetchInvoices();
@@ -335,13 +359,13 @@ export default function InvoicesPage() {
                       )}
 
                       {/* If Sent: Open Payment Link */}
-                      {(inv.paypal_status === 'SENT' || inv.paypal_status === 'UNPAID') && inv.payment_url && (
+                      {(inv.paypal_status === 'SENT' || inv.paypal_status === 'UNPAID') && (inv.payLink || inv.payment_url) && (
                         <a
-                          href={inv.payment_url}
+                          href={inv.payLink || inv.payment_url}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-50 text-brand-800 font-semibold text-[11px] hover:bg-brand-100 border border-brand-200"
-                          title="Open Customer PayPal Payment Link"
+                          title="Open Customer PayPal Pay Link"
                         >
                           <span>Pay Link</span>
                           <ExternalLink className="w-3 h-3" />
@@ -433,17 +457,17 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              {selectedInvoice.payment_url && (
+              {(selectedInvoice.payLink || selectedInvoice.payment_url) && (
                 <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200 space-y-1.5">
-                  <span className="text-purple-900 font-bold text-[11px] uppercase tracking-wider block">Customer Payment Link</span>
-                  <p className="text-[11px] text-purple-700 font-mono break-all">{selectedInvoice.payment_url}</p>
+                  <span className="text-purple-900 font-bold text-[11px] uppercase tracking-wider block">Customer Pay Link</span>
+                  <p className="text-[11px] text-purple-700 font-mono break-all">{selectedInvoice.payLink || selectedInvoice.payment_url}</p>
                   <a
-                    href={selectedInvoice.payment_url}
+                    href={selectedInvoice.payLink || selectedInvoice.payment_url}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-900 hover:underline pt-1"
                   >
-                    <span>Open PayPal Payment Page in New Tab</span>
+                    <span>Open PayPal Pay Link in New Tab</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>

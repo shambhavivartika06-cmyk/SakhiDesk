@@ -96,6 +96,7 @@ function initTables(db: Database.Database) {
       paypal_invoice_id TEXT,
       paypal_status TEXT DEFAULT 'DRAFT',
       payment_url TEXT,
+      pay_link TEXT,
       amount REAL NOT NULL,
       currency TEXT DEFAULT 'USD',
       notes TEXT,
@@ -128,6 +129,10 @@ function initTables(db: Database.Database) {
       created_at TEXT NOT NULL
     );
   `);
+
+  try {
+    db.exec('ALTER TABLE invoices ADD COLUMN pay_link TEXT');
+  } catch (_) {}
 }
 
 function seedIfEmpty(db: Database.Database) {
