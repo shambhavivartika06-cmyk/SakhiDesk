@@ -269,7 +269,7 @@ export default function CustomersPage() {
                   type="text"
                   value={formPhone}
                   onChange={(e) => setFormPhone(e.target.value)}
-                  placeholder="+91..."
+                  placeholder="Phone with country code"
                   className="w-full px-3 py-2 rounded-xl border border-brand-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
                 />
               </div>

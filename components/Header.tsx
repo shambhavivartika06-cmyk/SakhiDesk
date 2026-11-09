@@ -28,7 +28,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             <span className="font-semibold text-sm text-brand-950">Pooja's Artisan Delights & Boutique</span>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">Sandbox Verified</span>
           </div>
-          <p className="text-xs text-slate-500">Home Baker & Handcrafted Boutique &bull; USD Demonstration</p>
+          <p className="text-xs text-slate-500">Home Baker & Handcrafted Boutique &bull; Global orders</p>
         </div>
       </div>
 

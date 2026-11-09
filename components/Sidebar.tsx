@@ -68,7 +68,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <span className="font-bold text-xl text-brand-950 tracking-tight">SakhiDesk</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-100 text-brand-700 font-semibold uppercase">AI</span>
               </div>
-              <p className="text-xs text-slate-500 line-clamp-1">Small Business Assistant</p>
+              <p className="text-[10px] text-slate-500 line-clamp-1">Your business best friend, in any language.</p>
             </div>
           </Link>
           <button
@@ -127,6 +127,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <p className="text-[11px] text-emerald-700 mt-1">
               Sandbox Live Connected &bull; Real REST Invoicing
             </p>
+          </div>
+          <div className="text-center pt-2.5 text-[11px] text-slate-400 font-medium">
+            Made in India 🇮🇳
           </div>
         </div>
       </aside>

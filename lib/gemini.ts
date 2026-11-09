@@ -1,9 +1,58 @@
 export interface ExtractedOrderItem {
   name: string;
+  original_name?: string;
+  english_name?: string | null;
   quantity: number;
   unit_price: number | null;
   customization?: string;
   notes?: string;
+}
+
+/**
+ * Format product name according to language rule:
+ * - If customer language / original name is NOT English: "Original (English)" (e.g. "사과 (Apple)")
+ * - If already in English: "English" with NO brackets (e.g. "Chocolate Cake")
+ * - Max 200 characters
+ */
+export function buildProductDisplayName(originalName?: string | null, englishName?: string | null, fallbackName?: string | null): string {
+  const orig = (originalName || '').trim();
+  const eng = (englishName || '').trim();
+  const fallback = (fallbackName || '').trim();
+
+  // If already formatted with brackets like "사과 (Apple)"
+  if (orig.includes('(') && orig.includes(')')) {
+    return orig.slice(0, 200);
+  }
+  if (fallback.includes('(') && fallback.includes(')')) {
+    return fallback.slice(0, 200);
+  }
+
+  // Check if original name contains non-Latin/non-ASCII characters (e.g. Korean, Hindi, Japanese, Chinese, Arabic, Cyrillic)
+  const isNonLatin = /[^\u0000-\u007F]/.test(orig || fallback);
+
+  // If non-Latin and an English translation is available and different
+  if (isNonLatin) {
+    const origText = orig || fallback;
+    if (eng && eng.toLowerCase() !== origText.toLowerCase()) {
+      return `${origText} (${eng})`.slice(0, 200);
+    }
+    return origText.slice(0, 200);
+  }
+
+  // If in Latin characters: check if it was explicitly non-English (e.g. Spanish, French, Italian, German) and eng is different
+  if (orig && eng && orig.toLowerCase() !== eng.toLowerCase()) {
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normOrig = normalize(orig);
+    const normEng = normalize(eng);
+    if (normOrig === normEng || normOrig + 's' === normEng || normOrig === normEng + 's') {
+      return (eng || orig).slice(0, 200);
+    }
+    return `${orig} (${eng})`.slice(0, 200);
+  }
+
+  // English order item: show just the name with no brackets
+  const finalName = eng || orig || fallback || 'Custom Item';
+  return finalName.slice(0, 200);
 }
 
 export interface ExtractedOrderResult {
@@ -42,17 +91,26 @@ export async function extractOrderFromText(rawText: string, productCatalog?: Arr
     ? `\nSeller's Available Product Catalog for price reference:\n${productCatalog.map(p => `- ${p.name}: $${p.price.toFixed(2)}`).join('\n')}\nIf a customer item matches a catalog item, you may suggest the catalog unit_price, but do NOT guess prices if no match is found.`
     : '';
 
-  const systemPrompt = `You are SakhiDesk AI, an expert business order extractor for Indian small businesses (home bakers, tailors, handmade jewellery, handicrafts).
-The customer message may be in English, Hindi, Hinglish (Hindi words written in English letters, like "mujhe kal ke liye 2 chocolate cakes chahiye 1 kg each"), or mixed.
+  const systemPrompt = `You are SakhiDesk AI, an expert business order extractor for small businesses and independent entrepreneurs worldwide.
+The customer message may be in English, Korean, Spanish, French, German, Hindi, Hinglish, Japanese, Chinese, or any other language.
 
-CRITICAL INSTRUCTIONS:
-1. NEVER invent or fabricate missing information.
-2. If customer email is NOT mentioned, set customer_email to null and ADD to needs_attention: "Customer email is missing (Required to send PayPal invoice)".
-3. If unit price is not mentioned by customer and not found in catalog, set unit_price to null and ADD to needs_attention: "Price not specified. Please enter the unit price."
-4. If delivery date or time is ambiguous (e.g. "kal", "next Friday", "shaam ko"), resolve relative dates based on current reference date (Today is ${new Date().toISOString().split('T')[0]}), and if unclear, add to needs_attention.
-5. If delivery address is missing, set delivery_address to null and ADD to needs_attention: "Delivery address not provided."
-6. If there is special customization (e.g., cake inscription, kurti size/colour), capture it under customization.
-7. Return PURE JSON conforming to the requested schema. No markdown formatting or extra text outside JSON.`;
+CRITICAL LANGUAGE & PRODUCT NAMING RULES:
+1. PRODUCT NAME EXTRACTION:
+   - For every product/item in the order, you MUST extract:
+     a) "original_name": The product name in the customer's ORIGINAL language exactly as written/intended (e.g. "사과", "tarta de chocolate", "chocolate cake", "robe d'été").
+     b) "english_name": The English translation of the product name (e.g. "Apple", "Chocolate Cake", "Summer Dress"). If the product or message is already in English, english_name should match original_name.
+     c) "name": One single display string formatted strictly according to this rule:
+        - If the customer's original language for this product is NOT English: format as "<original_name> (<english_name>)", for example "사과 (Apple)" or "tarta de chocolate (Chocolate Cake)".
+        - If the customer's original language for this product IS English (or the item is written in English, e.g. "Chocolate Cake"): format as JUST the English name with NO brackets (for example "Chocolate Cake").
+        - Maximum length of "name" must be 200 characters.
+
+2. NEVER invent or fabricate missing information.
+3. If customer email is NOT mentioned, set customer_email to null and ADD to needs_attention: "Customer email is missing (Required to send PayPal invoice)".
+4. If unit price is not mentioned by customer and not found in catalog, set unit_price to null and ADD to needs_attention: "Price not specified. Please enter the unit price."
+5. If delivery date or time is ambiguous (e.g. "kal", "next Friday", "shaam ko"), resolve relative dates based on current reference date (Today is ${new Date().toISOString().split('T')[0]}), and if unclear, add to needs_attention.
+6. If delivery address is missing, set delivery_address to null and ADD to needs_attention: "Delivery address not provided."
+7. If there is special customization (e.g., cake inscription, size/colour), capture it under customization.
+8. Return PURE JSON conforming to the requested schema. No markdown formatting or extra text outside JSON.`;
 
   const userPrompt = `Customer Message:
 """
@@ -70,7 +128,9 @@ Extract and return a JSON object with this exact structure:
   "delivery_address": string or null,
   "items": [
     {
-      "name": string,
+      "original_name": string,
+      "english_name": string or null,
+      "name": string (Display string: "Original (English)" if non-English, or "Original" if English, max 200 chars),
       "quantity": number,
       "unit_price": number or null,
       "customization": string or null,
@@ -81,7 +141,7 @@ Extract and return a JSON object with this exact structure:
   "currency": "USD",
   "additional_notes": string or null,
   "needs_attention": [array of string warnings for missing, ambiguous, or critical fields],
-  "detected_language": "English" or "Hindi" or "Hinglish"
+  "detected_language": string (e.g. "English", "Korean", "Hindi", "Hinglish", "Spanish", etc.)
 }`;
 
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
@@ -127,9 +187,12 @@ Extract and return a JSON object with this exact structure:
 export async function extractOrderFromImage(base64Data: string, mimeType: string): Promise<ExtractedOrderResult> {
   const apiKey = getGeminiApiKey();
 
-  const systemPrompt = `You are SakhiDesk AI. Analyze this image of a customer order (could be a WhatsApp chat screenshot, an order slip, or a handwritten notebook page).
+  const systemPrompt = `You are SakhiDesk AI. Analyze this image of a customer order (could be a chat screenshot, an order slip, or a handwritten notebook page).
 Extract the customer details, products, quantities, prices, delivery dates, and customizations.
-Understand English, Hindi, and Hinglish handwriting or text.
+For each product, extract "original_name", "english_name", and "name" following the language rule:
+- Non-English products: "Original (English)" (e.g. "사과 (Apple)")
+- English products: Just the English name without brackets (e.g. "Chocolate Cake")
+- Max length of "name" is 200 characters.
 CRITICAL: Never invent missing information. Highlight any unclear handwriting, missing email, missing address, or missing prices in 'needs_attention'.
 Return pure JSON matching the standard SakhiDesk order schema.`;
 
@@ -283,12 +346,16 @@ function sanitizeExtractedOrder(parsed: any, originalText: string): ExtractedOrd
           ? Number(it.unit_price)
           : null;
 
+        const displayName = buildProductDisplayName(it.original_name, it.english_name, it.name);
+
         if (price === null && !needsAttention.some(w => w.toLowerCase().includes('price'))) {
-          needsAttention.push(`Price missing for "${it.name || 'item'}". Please specify before creating invoice.`);
+          needsAttention.push(`Price missing for "${displayName}". Please specify before creating invoice.`);
         }
 
         return {
-          name: it.name || 'Custom Item',
+          name: displayName,
+          original_name: it.original_name || it.name,
+          english_name: it.english_name || null,
           quantity: qty,
           unit_price: price,
           customization: it.customization || '',

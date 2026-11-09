@@ -150,9 +150,9 @@ function seedIfEmpty(db: Database.Database) {
     'Pooja Sharma',
     "Pooja's Artisan Delights & Boutique",
     'Home Baker & Handcrafted Boutique',
-    '+91 98765 43210',
+    'Phone with country code',
     'sb-merchant@business.example.com',
-    'Flat 402, Sunshine Heights, Mumbai, India',
+    'Your studio address',
     'pooja.delights@upi',
     'USD',
     'Small home-based kitchen and handcrafted designer studio specializing in custom cakes, embroidered outfits, and artisanal accessories made with love.',
@@ -237,9 +237,9 @@ function seedIfEmpty(db: Database.Database) {
     {
       id: 'cust_1',
       name: 'Ananya Verma',
-      phone: '+91 98200 12345',
+      phone: 'Phone with country code',
       email: 'ananya.verma@example.com',
-      address: 'B-12 Palm Grove, Bandra West, Mumbai',
+      address: '12 Palm Grove',
       notes: 'Loyal customer, prefers eggless cakes.',
       total_orders: 3,
       total_spent: 120.00,
@@ -248,21 +248,21 @@ function seedIfEmpty(db: Database.Database) {
     {
       id: 'cust_2',
       name: 'Rohit Patel',
-      phone: '+91 98111 67890',
+      phone: 'Phone with country code',
       email: 'rohit.patel@example.com',
-      address: '401 Lotus Enclave, Andheri East, Mumbai',
-      notes: 'Bought custom kurti for sister wedding.',
+      address: '401 Lotus Enclave',
+      notes: 'Bought custom dress for family event.',
       total_orders: 1,
-      total_spent: 35.00,
-      outstanding_balance: 35.00
+      total_spent: 60.00,
+      outstanding_balance: 60.00
     },
     {
       id: 'cust_3',
       name: 'Sunita Mehra',
-      phone: '+91 98333 45678',
+      phone: 'Phone with country code',
       email: 'sunita.mehra@example.com',
-      address: '15 Rose Villa, Powai, Mumbai',
-      notes: 'Loves homemade mango pickles & gift boxes.',
+      address: '15 Rose Villa',
+      notes: 'Loves handcrafted items & gift boxes.',
       total_orders: 2,
       total_spent: 42.00,
       outstanding_balance: 0
@@ -270,9 +270,9 @@ function seedIfEmpty(db: Database.Database) {
     {
       id: 'cust_4',
       name: 'Priya Kapoor',
-      phone: '+91 98444 89012',
+      phone: 'Phone with country code',
       email: 'priya.k@example.com',
-      address: '702 Sea View Apartments, Juhu, Mumbai',
+      address: '702 Ocean View Apartments',
       notes: 'Requires delivery before 5 PM on weekdays.',
       total_orders: 1,
       total_spent: 50.00,
@@ -301,11 +301,11 @@ function seedIfEmpty(db: Database.Database) {
     'ORD-2026-001',
     'cust_1',
     'Ananya Verma',
-    '+91 98200 12345',
+    'Phone with country code',
     'ananya.verma@example.com',
     '2026-11-05',
     '6:00 PM',
-    'B-12 Palm Grove, Bandra West, Mumbai',
+    '12 Palm Grove',
     order1Items,
     50.00, 0, 0, 50.00, 'USD',
     'PAID',
@@ -344,7 +344,7 @@ function seedIfEmpty(db: Database.Database) {
 
   // Demo Order 2: PAYMENT_PENDING Demo Order
   const order2Items = JSON.stringify([
-    { name: 'Handcrafted Blue Phulkari Kurti (Size M)', quantity: 1, unit_price: 35.00, customization: 'Size M, royal blue', total: 35.00 }
+    { name: 'Handcrafted Blue Dress (Size M)', quantity: 1, unit_price: 60.00, customization: 'Size M, royal blue', total: 60.00 }
   ]);
   db.prepare(`
     INSERT INTO orders (id, order_number, customer_id, customer_name, customer_phone, customer_email, delivery_date, delivery_time, delivery_address, items_json, subtotal, tax, discount, total_amount, currency, status, notes, original_message, needs_attention_json, input_type, paypal_invoice_id, is_demo, created_at, updated_at)
@@ -354,16 +354,16 @@ function seedIfEmpty(db: Database.Database) {
     'ORD-2026-002',
     'cust_2',
     'Rohit Patel',
-    '+91 98111 67890',
+    'Phone with country code',
     'rohit.patel@example.com',
     '2026-11-10',
     '4:00 PM',
-    '401 Lotus Enclave, Andheri East, Mumbai',
+    '401 Lotus Enclave',
     order2Items,
-    35.00, 0, 0, 35.00, 'USD',
+    60.00, 0, 0, 60.00, 'USD',
     'PAYMENT_PENDING',
     'Invoice sent, waiting for customer payment.',
-    'I need 1 customised kurti in blue colour. Size M, delivery on 10th. Please confirm the price.',
+    'I need 1 customised dress in blue colour. Size M, delivery on 10th. Price is $60. Please confirm.',
     JSON.stringify([]),
     'TEXT',
     'INV2-DEMO-SENT-002',
@@ -384,7 +384,7 @@ function seedIfEmpty(db: Database.Database) {
     'INV2-DEMO-SENT-002',
     'SENT',
     'https://www.sandbox.paypal.com/invoice/p/#DEMO_SENT_002',
-    35.00,
+    60.00,
     'USD',
     'Demo sample invoice - Sent & Pending Payment',
     1,
@@ -397,7 +397,7 @@ function seedIfEmpty(db: Database.Database) {
 
   // Demo Order 3: NEEDS_REVIEW Demo Order (messy message with yellow warning)
   const order3Items = JSON.stringify([
-    { name: 'Handmade Beaded Kundan Bracelet', quantity: 5, unit_price: 5.00, customization: 'Assorted colors', total: 25.00 }
+    { name: 'Handmade Beaded Bracelet', quantity: 5, unit_price: 5.00, customization: 'Assorted colors', total: 25.00 }
   ]);
   db.prepare(`
     INSERT INTO orders (id, order_number, customer_id, customer_name, customer_phone, customer_email, delivery_date, delivery_time, delivery_address, items_json, subtotal, tax, discount, total_amount, currency, status, notes, original_message, needs_attention_json, input_type, paypal_invoice_id, is_demo, created_at, updated_at)
@@ -407,7 +407,7 @@ function seedIfEmpty(db: Database.Database) {
     'ORD-2026-003',
     'cust_3',
     'Sunita Mehra',
-    '+91 98333 45678',
+    'Phone with country code',
     '',
     '2026-11-12',
     '',

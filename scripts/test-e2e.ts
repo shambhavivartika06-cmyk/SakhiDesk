@@ -71,13 +71,13 @@ async function runEndToEndTests() {
     `SKH-TEST-${Date.now().toString().slice(-4)}`,
     'cust_1',
     'Ananya Verma',
-    '+91 98200 12345',
+    'Phone with country code',
     'sb-buyer@personal.example.com', // Valid PayPal sandbox test buyer email
     '2026-11-15',
     '6:00 PM',
-    'Bandra West, Mumbai',
+    '12 Palm Grove',
     JSON.stringify([
-      { name: 'Custom Chocolate Cake (1 kg)', quantity: 2, unit_price: 25.00, customization: 'Happy Birthday Aanya' }
+      { name: 'Chocolate Cake', quantity: 2, unit_price: 25.00, customization: 'Happy Birthday Aanya' }
     ]),
     50.00,
     50.00,

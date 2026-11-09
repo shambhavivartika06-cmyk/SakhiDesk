@@ -28,14 +28,14 @@ const SAMPLE_MESSAGES = [
     text: 'Hi didi, mujhe kal ke liye 2 chocolate cakes chahiye, 1 kg each. One cake should have Happy Birthday Aanya written on it. Total price kitna hoga? Delivery tomorrow evening at 6.'
   },
   {
-    title: '👗 3 Customised Kurtis (Boutique)',
-    desc: 'Size M, blue color, missing price & address',
-    text: 'I need 3 customised kurtis in blue colour. Size M, delivery on Friday. Please confirm the price and delivery charges.'
+    title: '👗 1 Handcrafted Dress ($60)',
+    desc: 'Size M, blue color, $60 price confirmed',
+    text: 'Hello, I would like to order 1 handcrafted designer dress in royal blue, size M. The price is $60 USD. Delivery by Friday afternoon please.'
   },
   {
-    title: '📿 5 Handmade Bracelets (Handicrafts)',
-    desc: 'Price mentioned ($5 each), missing customer email',
-    text: 'Namaste didi, 5 handmade beaded Kundan bracelets chahiye. Har ek 5 dollars ka. Delivery next Monday afternoon tak chahiye.'
+    title: '📿 5 Handmade Bracelets ($5 each)',
+    desc: 'Price mentioned ($5 each, total $25)',
+    text: 'Hello! I need 5 handmade beaded bracelets. They are $5 each, total $25. Can you deliver by next Monday?'
   }
 ];
 
@@ -213,7 +213,7 @@ export default function CreateOrderPage() {
         delivery_time: deliveryTime,
         delivery_address: deliveryAddress,
         items: items.map(it => ({
-          name: it.name,
+          name: (it.name || 'Custom Item').slice(0, 200),
           quantity: Number(it.quantity) || 1,
           unit_price: Number(it.unit_price) || 0,
           customization: it.customization,
@@ -502,7 +502,7 @@ export default function CreateOrderPage() {
                           setIsRecording(true);
                           setTimeout(() => {
                             setIsRecording(false);
-                            setInputText("Namaste didi, mujhe 2 custom suit chahiye royal blue color me. Delivery next Friday tak.");
+                            setInputText("Hi didi, mujhe 2 custom dresses chahiye royal blue color me. Delivery next Friday tak.");
                             setActiveTab('text');
                           }, 3000);
                         }
@@ -621,7 +621,7 @@ export default function CreateOrderPage() {
                       type="text"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="+91..."
+                      placeholder="Phone with country code"
                       className="w-full px-3 py-2 text-sm rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-500 focus:outline-none"
                     />
                   </div>

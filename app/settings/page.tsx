@@ -169,17 +169,19 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Phone / WhatsApp</label>
               <input
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                placeholder="Phone with country code"
                 className="w-full px-3 py-2 rounded-xl border border-brand-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
               />
             </div>
-            <div>
+            {/* UPI ID field hidden per country-neutral requirements (code and state preserved) */}
+            <div className="hidden">
               <label className="block font-semibold text-slate-700 mb-1">UPI ID (Optional)</label>
               <input
                 type="text"
@@ -189,18 +191,10 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Demo Currency</label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-brand-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
-              >
-                <option value="USD">USD ($) - PayPal Sandbox</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="AUD">AUD ($)</option>
-                <option value="INR">INR (₹)</option>
-              </select>
+              <label className="block font-semibold text-slate-700 mb-1">Currency</label>
+              <div className="px-3 py-2 rounded-xl bg-slate-50 border border-brand-200 text-xs text-slate-700 font-medium flex items-center h-[38px]">
+                Customers pay in USD through PayPal.
+              </div>
             </div>
           </div>
 
@@ -210,6 +204,7 @@ export default function SettingsPage() {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              placeholder="Your studio address"
               className="w-full px-3 py-2 rounded-xl border border-brand-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
             />
           </div>

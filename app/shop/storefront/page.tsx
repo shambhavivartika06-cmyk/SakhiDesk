@@ -129,10 +129,10 @@ export default function PublicStorefrontPage() {
     name: 'Pooja Sharma',
     business_name: "Pooja's Artisan Delights & Boutique",
     category: 'Home Baker & Handcrafted Boutique',
-    bio: 'Artisanal cakes, handcrafted designer kurtis, and festive accessories made fresh with love from our home studio in Mumbai.',
-    phone: '+91 98765 43210',
+    bio: 'Artisanal cakes, handcrafted designer creations, and accessories made fresh with love from our home studio.',
+    phone: 'Phone with country code',
     email: 'sb-merchant@business.example.com',
-    address: 'Mumbai, India'
+    address: 'Your studio address'
   };
 
   return (
@@ -378,7 +378,7 @@ export default function PublicStorefrontPage() {
                             required
                             value={customerPhone}
                             onChange={(e) => setCustomerPhone(e.target.value)}
-                            placeholder="+91..."
+                            placeholder="Phone with country code"
                             className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                           />
                         </div>

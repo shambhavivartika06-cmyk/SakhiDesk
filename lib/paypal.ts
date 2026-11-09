@@ -220,7 +220,7 @@ export async function createPayPalInvoice(params: CreateInvoiceParams): Promise<
       }
     ],
     items: params.items.map(item => ({
-      name: item.name.slice(0, 300),
+      name: item.name.slice(0, 200),
       description: item.description ? item.description.slice(0, 1000) : undefined,
       quantity: String(item.quantity || 1),
       unit_amount: {

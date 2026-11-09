@@ -56,7 +56,7 @@ async function runTest() {
   console.log('1. Testing Customer Email Validation before PayPal call...');
   const invalidEmailOrderRes = await postJson('/api/orders', {
     customer_name: 'Invalid Email Tester',
-    customer_phone: '+91 99999 88888',
+    customer_phone: 'Phone with country code',
     customer_email: 'invalid-email-address',
     items: [{ name: 'Custom Butter Cake', quantity: 1, unit_price: 20.00 }],
     status: 'CONFIRMED'
@@ -77,14 +77,14 @@ async function runTest() {
   console.log(`2. Creating Fresh Valid Order #${runId} with real Sandbox buyer email...`);
   const orderRes = await postJson('/api/orders', {
     customer_name: `Pooja Buyer ${runId}`,
-    customer_phone: '+91 98765 12345',
+    customer_phone: 'Phone with country code',
     customer_email: 'sb-buyer@personal.example.com',
     delivery_date: '2026-11-12',
     delivery_time: '5:00 PM',
-    delivery_address: 'B-204, Lotus Park, Mumbai',
+    delivery_address: '12 Palm Grove',
     items: [
       {
-        name: 'Custom Belgian Chocolate Cake (1kg)',
+        name: 'Chocolate Cake',
         quantity: 1,
         unit_price: 35.00,
         customization: 'Happy Birthday Pooja'

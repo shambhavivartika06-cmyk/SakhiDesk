@@ -47,7 +47,7 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -97,7 +97,7 @@ export default function DashboardPage() {
               <span>PayPal Sandbox Invoicing Active</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
-              Namaste, {data?.seller?.name || 'Pooja'}! ✨
+              {language === 'en' ? 'Welcome back' : 'Namaste'}, {data?.seller?.name || 'Pooja'}! ✨
             </h1>
             <p className="text-sm text-brand-200 max-w-xl">
               Welcome back to <span className="font-semibold text-white">SakhiDesk</span>. You have{' '}

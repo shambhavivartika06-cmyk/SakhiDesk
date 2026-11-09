@@ -35,7 +35,7 @@ export default function AssistantPage() {
     {
       id: 'welcome_1',
       sender: 'assistant',
-      text: "Namaste! I'm Sakhi, your AI business assistant. 🌸 Ask me anything about your orders, confirmed revenue, pending PayPal invoices, or bestsellers. What would you like to know today?",
+      text: "Hello! I'm Sakhi, your AI business assistant. 🌸 Ask me anything about your orders, confirmed revenue, pending PayPal invoices, or bestsellers. What would you like to know today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
