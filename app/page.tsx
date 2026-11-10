@@ -40,6 +40,7 @@ interface DashboardData {
     completedOrders: number;
     outstandingInvoices: number;
   };
+  monthlySales?: { month: string; paid: number; pending: number; offline: number }[];
   recentOrders: any[];
   recentActivity: any[];
   upcomingReminders: any[];
@@ -76,14 +77,8 @@ export default function DashboardPage() {
     fetchDashboardData();
   };
 
-  const chartData = [
-    { month: 'Jun', paid: 120, pending: 0 },
-    { month: 'Jul', paid: 240, pending: 30 },
-    { month: 'Aug', paid: 310, pending: 45 },
-    { month: 'Sep', paid: 420, pending: 60 },
-    { month: 'Oct', paid: 510, pending: 50 },
-    { month: 'Nov (Current)', paid: data?.kpis?.totalRevenue || 50, pending: data?.kpis?.pendingRevenue || 35 },
-  ];
+  // Real monthly figures come from the API (last 6 months). No fabricated values.
+  const chartData = data?.monthlySales && data.monthlySales.length > 0 ? data.monthlySales : [];
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">

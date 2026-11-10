@@ -128,6 +128,21 @@ function initTables(db: Database.Database) {
       reference_id TEXT,
       created_at TEXT NOT NULL
     );
+
+    -- Manually recorded offline sales (cash / other offline payments).
+    -- Additive table: created only if missing, never alters existing tables or data.
+    CREATE TABLE IF NOT EXISTS offline_sales (
+      id TEXT PRIMARY KEY,
+      seller_id TEXT,
+      sale_date TEXT NOT NULL,
+      description TEXT NOT NULL,
+      quantity REAL DEFAULT 1,
+      amount REAL NOT NULL,
+      payment_method TEXT DEFAULT 'CASH',
+      customer_name TEXT,
+      is_test INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
   `);
 
   try {
