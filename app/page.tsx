@@ -89,26 +89,13 @@ export default function DashboardPage() {
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Top Banner / Welcome Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900 via-brand-800 to-sakhi-deep p-6 sm:p-8 text-white shadow-elevated">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-sakhi-pink/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium text-brand-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>PayPal Sandbox Invoicing Active</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
               {language === 'en' ? 'Welcome back' : 'Namaste'}, {data?.seller?.name || 'Pooja'}! ✨
             </h1>
             <p className="text-sm text-brand-200 max-w-xl">
-              Welcome back to <span className="font-semibold text-white">{data?.seller?.business_name || 'SakhiDesk'}</span>. You have{' '}
-              <span className="font-bold text-amber-300">
-                ${(data?.kpis?.pendingRevenue || 0).toFixed(2)}
-              </span>{' '}
-              in pending payments and{' '}
-              <span className="font-bold text-emerald-300">
-                ${(data?.kpis?.totalRevenue || 0).toFixed(2)}
-              </span>{' '}
-              confirmed paid revenue.
+              {data?.seller?.business_name || 'SakhiDesk'} — here is your business at a glance.
             </p>
           </div>
 

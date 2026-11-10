@@ -39,6 +39,10 @@ const SAMPLE_MESSAGES = [
   }
 ];
 
+// The Voice Note Transcript input is hidden in the simplified UI (the feature is not
+// functional yet). All voice-related code below is preserved; set this to true to restore it.
+const SHOW_VOICE_INPUT = false;
+
 interface OrderItem {
   name: string;
   quantity: number;
@@ -417,17 +421,19 @@ export default function CreateOrderPage() {
                 <ImageIcon className="w-4 h-4" />
                 <span>Screenshot / Notebook Photo</span>
               </button>
-              <button
-                onClick={() => setActiveTab('voice')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  activeTab === 'voice'
-                    ? 'bg-brand-600 text-white shadow-soft'
-                    : 'text-slate-600 hover:text-brand-900 hover:bg-brand-50'
-                }`}
-              >
-                <Mic className="w-4 h-4" />
-                <span>Voice Note Transcript</span>
-              </button>
+              {SHOW_VOICE_INPUT && (
+                <button
+                  onClick={() => setActiveTab('voice')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                    activeTab === 'voice'
+                      ? 'bg-brand-600 text-white shadow-soft'
+                      : 'text-slate-600 hover:text-brand-900 hover:bg-brand-50'
+                  }`}
+                >
+                  <Mic className="w-4 h-4" />
+                  <span>Voice Note Transcript</span>
+                </button>
+              )}
             </div>
 
             {/* Tab 1: Text Input */}
@@ -483,8 +489,8 @@ export default function CreateOrderPage() {
               </div>
             )}
 
-            {/* Tab 3: Voice Note */}
-            {activeTab === 'voice' && (
+            {/* Tab 3: Voice Note (hidden in simplified UI — see SHOW_VOICE_INPUT) */}
+            {SHOW_VOICE_INPUT && activeTab === 'voice' && (
               <div className="space-y-4">
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
                   Voice Note Order
