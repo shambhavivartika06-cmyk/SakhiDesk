@@ -187,14 +187,53 @@ Extract and return a JSON object with this exact structure:
 export async function extractOrderFromImage(base64Data: string, mimeType: string): Promise<ExtractedOrderResult> {
   const apiKey = getGeminiApiKey();
 
-  const systemPrompt = `You are SakhiDesk AI. Analyze this image of a customer order (could be a chat screenshot, an order slip, or a handwritten notebook page).
-Extract the customer details, products, quantities, prices, delivery dates, and customizations.
-For each product, extract "original_name", "english_name", and "name" following the language rule:
-- Non-English products: "Original (English)" (e.g. "사과 (Apple)")
-- English products: Just the English name without brackets (e.g. "Chocolate Cake")
-- Max length of "name" is 200 characters.
-CRITICAL: Never invent missing information. Highlight any unclear handwriting, missing email, missing address, or missing prices in 'needs_attention'.
-Return pure JSON matching the standard SakhiDesk order schema.`;
+  const systemPrompt = `You are SakhiDesk AI, an expert business order extractor for small businesses and independent entrepreneurs worldwide.
+You are given an IMAGE containing a customer order. The image may be:
+- a WhatsApp / Instagram / chat screenshot,
+- a photo of a handwritten notebook page or order slip,
+- a screenshot of a typed message, list, or document.
+Read ALL visible content in the image. If it shows a chat conversation, extract the CUSTOMER'S order (ignore the seller's own replies).
+The text may be in English, Korean, Spanish, French, German, Hindi, Hinglish, Japanese, Chinese, or any other language.
+
+CRITICAL LANGUAGE & PRODUCT NAMING RULES:
+1. PRODUCT NAME EXTRACTION: For every product/item you MUST extract:
+   a) "original_name": the product name exactly as written in the image, in its original language (e.g. "사과", "tarta de chocolate", "Saree").
+   b) "english_name": the English translation of the product name (if it is already English, repeat the same text).
+   c) "name": One single display string formatted strictly:
+      - If the item's original language is NOT English: "<original_name> (<english_name>)" (e.g. "사과 (Apple)").
+      - If the item is in English: JUST the English name with NO brackets (e.g. "Saree"). Max 200 characters.
+2. NEVER invent or fabricate information that is not visible in the image.
+3. If the customer email is not visible, set customer_email to null and ADD to needs_attention: "Customer email is missing (Required to send PayPal invoice)".
+4. If a unit price is not visible/legible, set unit_price to null and ADD to needs_attention: "Price not specified. Please enter the unit price." If a price is ambiguous, add a clear warning (e.g. "Unit price ambiguous for one item - please confirm.").
+5. If handwriting is unclear or a value is uncertain, add a specific warning to needs_attention (e.g. "Unclear handwriting for one item - please verify.").
+6. If the delivery date or time is ambiguous or relative (e.g. "kal", "next Friday", "shaam ko"), resolve it against the reference date (Today is ${new Date().toISOString().split('T')[0]}); if still unclear, add to needs_attention.
+7. If the delivery address is not visible, set delivery_address to null and ADD to needs_attention: "Delivery address not provided."
+8. Capture any special customization (e.g. cake inscription, size, colour) under customization.
+9. Return PURE JSON ONLY, with no markdown formatting or extra text, using this EXACT structure:
+{
+  "customer_name": string or null,
+  "customer_phone": string or null,
+  "customer_email": string or null,
+  "delivery_date": string (YYYY-MM-DD) or null,
+  "delivery_time": string or null,
+  "delivery_address": string or null,
+  "items": [
+    {
+      "original_name": string,
+      "english_name": string or null,
+      "name": string (display string, max 200 chars),
+      "quantity": number,
+      "unit_price": number or null,
+      "customization": string or null,
+      "notes": string or null
+    }
+  ],
+  "subtotal": number or null (calculate ONLY if all items have confirmed unit_price),
+  "currency": "USD",
+  "additional_notes": string or null,
+  "needs_attention": [array of string warnings for missing, ambiguous, or critical fields],
+  "detected_language": string (e.g. "English", "Korean", "Hindi", "Hinglish", "Spanish", etc.)
+}`;
 
   const cleanBase64 = base64Data.replace(/^data:[^;]+;base64,/, '');
 
@@ -228,8 +267,17 @@ Return pure JSON matching the standard SakhiDesk order schema.`;
 
   const data = await res.json();
   const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  const parsed = JSON.parse(rawJson);
-  return sanitizeExtractedOrder(parsed, 'Uploaded order image');
+  if (!rawJson) {
+    throw new Error('Gemini Vision returned an empty response for the uploaded image.');
+  }
+
+  try {
+    const parsed: ExtractedOrderResult = JSON.parse(rawJson);
+    return sanitizeExtractedOrder(parsed, 'Uploaded order image');
+  } catch (err) {
+    console.error('Failed to parse Gemini vision output:', rawJson);
+    throw new Error('Could not parse extracted order data from the image. Please review and enter details manually.');
+  }
 }
 
 /**
