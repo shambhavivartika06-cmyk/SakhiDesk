@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ShoppingBag,
   Search,
@@ -60,6 +60,7 @@ interface Order {
 function OrdersContent() {
   const { t } = useI18n();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialId = searchParams.get('id');
 
   const [orders, setOrders] = useState<Order[]>([]);
@@ -68,6 +69,7 @@ function OrdersContent() {
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
 
   const fetchOrders = async () => {
     try {
@@ -110,6 +112,35 @@ function OrdersContent() {
       alert('Error updating status');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  // Create a real PayPal Sandbox invoice for a confirmed order.
+  // Reuses the existing, working invoice creation API (POST /api/paypal/create-invoice).
+  const handleCreateInvoice = async (order: Order) => {
+    if (isCreatingInvoice) return;
+    setIsCreatingInvoice(true);
+    try {
+      const res = await fetch('/api/paypal/create-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create PayPal invoice.');
+      }
+
+      if (data.alreadyExists) {
+        alert('A PayPal invoice already exists for this order. Opening the Invoices page.');
+      }
+
+      router.push('/invoices');
+    } catch (err: any) {
+      alert('PayPal invoice creation failed: ' + err.message);
+    } finally {
+      setIsCreatingInvoice(false);
     }
   };
 
@@ -394,12 +425,14 @@ function OrdersContent() {
                   </button>
                 )}
                 {selectedOrder.status === 'CONFIRMED' && !selectedOrder.paypal_invoice_id && (
-                  <Link
-                    href={`/invoices`}
-                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-semibold shadow-sm hover:opacity-95"
+                  <button
+                    onClick={() => handleCreateInvoice(selectedOrder)}
+                    disabled={isCreatingInvoice}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-semibold shadow-sm hover:opacity-95 disabled:opacity-60 flex items-center gap-1.5"
                   >
-                    Proceed to PayPal Invoicing
-                  </Link>
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>{isCreatingInvoice ? 'Creating PayPal Invoice...' : 'Generate PayPal Invoice'}</span>
+                  </button>
                 )}
                 {selectedOrder.status !== 'COMPLETED' && selectedOrder.status === 'PAID' && (
                   <button
