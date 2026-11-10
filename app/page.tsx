@@ -100,7 +100,7 @@ export default function DashboardPage() {
               {language === 'en' ? 'Welcome back' : 'Namaste'}, {data?.seller?.name || 'Pooja'}! ✨
             </h1>
             <p className="text-sm text-brand-200 max-w-xl">
-              Welcome back to <span className="font-semibold text-white">SakhiDesk</span>. You have{' '}
+              Welcome back to <span className="font-semibold text-white">{data?.seller?.business_name || 'SakhiDesk'}</span>. You have{' '}
               <span className="font-bold text-amber-300">
                 ${(data?.kpis?.pendingRevenue || 0).toFixed(2)}
               </span>{' '}

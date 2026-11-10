@@ -53,14 +53,41 @@ export default function SettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          business_name: businessName,
+          category,
+          phone,
+          email,
+          address,
+          upi_id: upiId,
+          currency,
+          bio
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save business settings.');
+      }
+      if (data.seller) {
+        setSeller(data.seller);
+      }
+      // Notify the header (and any other listeners) to refresh the business identity immediately
+      window.dispatchEvent(new Event('seller-updated'));
       setSaveNotice(true);
       setTimeout(() => setSaveNotice(false), 3000);
-    }, 600);
+    } catch (err: any) {
+      alert('Could not save settings: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

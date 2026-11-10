@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Menu, Sparkles, Globe, Bell, Store } from 'lucide-react';
 import { useI18n, Language } from '@/lib/i18n';
@@ -11,6 +11,26 @@ interface HeaderProps {
 
 export function Header({ onOpenSidebar }: HeaderProps) {
   const { language, setLanguage, t } = useI18n();
+  const [businessName, setBusinessName] = useState("Pooja's Artisan Delights & Boutique");
+  const [category, setCategory] = useState('Home Baker & Handcrafted Boutique');
+
+  // Business identity is a single source of truth read from Settings / DB
+  useEffect(() => {
+    const loadSeller = () => {
+      fetch('/api/settings')
+        .then(r => r.json())
+        .then(d => {
+          if (d?.success && d.seller) {
+            if (d.seller.business_name) setBusinessName(d.seller.business_name);
+            if (d.seller.category) setCategory(d.seller.category);
+          }
+        })
+        .catch(() => {});
+    };
+    loadSeller();
+    window.addEventListener('seller-updated', loadSeller);
+    return () => window.removeEventListener('seller-updated', loadSeller);
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 h-20 bg-cream-50/80 backdrop-blur-md border-b border-brand-100 px-4 sm:px-6 flex items-center justify-between">
@@ -25,10 +45,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         </button>
         <div className="hidden sm:block">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm text-brand-950">Pooja's Artisan Delights & Boutique</span>
+            <span className="font-semibold text-sm text-brand-950">{businessName}</span>
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">Sandbox Verified</span>
           </div>
-          <p className="text-xs text-slate-500">Home Baker & Handcrafted Boutique &bull; Global orders</p>
+          <p className="text-xs text-slate-500">{category} &bull; Global orders</p>
         </div>
       </div>
 
