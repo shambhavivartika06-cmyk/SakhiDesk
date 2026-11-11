@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export type Language = 'en' | 'hi' | 'hinglish';
 
@@ -167,14 +167,10 @@ const I18nContext = createContext<I18nContextType>({
 });
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
+  // UI language is forced to English on every load (the language selector was
+  // removed). Saved 'hi'/'hinglish' preferences are intentionally not restored
+  // so they can never override English.
   const [language, setLanguageState] = useState<Language>('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('sakhidesk_lang') as Language;
-    if (saved && (saved === 'en' || saved === 'hi' || saved === 'hinglish')) {
-      setLanguageState(saved);
-    }
-  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
