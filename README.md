@@ -5,7 +5,7 @@
 An AI-powered business assistant for small businesses across industries. Built in India 🇮🇳, made for sellers everywhere.
 
 - **Live demo:** https://sakhidesk.onrender.com
-- **Demo video:** Coming soon
+- **Demo video:** https://youtu.be/DVMrTo-ImuE?si=DC9MaFhonaSZnsuU
 
 ## The problem
 
