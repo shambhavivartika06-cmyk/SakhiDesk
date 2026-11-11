@@ -2,14 +2,14 @@
 
 **Your business best friend, in any language.**
 
-An AI order-to-invoice assistant for home-based sellers. Built in India 🇮🇳, made for sellers everywhere.
+An AI-powered business assistant for small businesses across industries. Built in India 🇮🇳, made for sellers everywhere.
 
 - **Live demo:** https://sakhidesk.onrender.com
 - **Demo video:** Coming soon
 
 ## The problem
 
-Home bakers, tailors and craft sellers receive orders through chat messages, notes and calls, often in different languages. Turning each order into a structured record, invoice and payment record takes time and manual effort.
+Small businesses across industries receive customer orders through chat messages, calls, notes and other informal channels. Managing these orders, extracting the right details, creating invoices, tracking payments and maintaining business records can be time-consuming and fragmented, especially for businesses with limited resources.
 
 ## What SakhiDesk does
 

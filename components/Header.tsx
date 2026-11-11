@@ -2,15 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Menu, Sparkles, Globe, Bell, Store } from 'lucide-react';
-import { useI18n, Language } from '@/lib/i18n';
+import { Menu, Sparkles, Bell, Store } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
 }
 
 export function Header({ onOpenSidebar }: HeaderProps) {
-  const { language, setLanguage, t } = useI18n();
+  const { t } = useI18n();
   const [businessName, setBusinessName] = useState("Pooja's Artisan Delights & Boutique");
   const [category, setCategory] = useState('Home Baker & Handcrafted Boutique');
 
@@ -52,37 +52,8 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         </div>
       </div>
 
-      {/* Right side: Language Selector + Quick Actions + Mini Shop link */}
+      {/* Right side: Mini Shop link + Quick Actions + Notifications */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Language selector */}
-        <div className="flex items-center bg-white/90 border border-brand-200 rounded-xl p-1 shadow-sm">
-          <Globe className="w-3.5 h-3.5 text-brand-600 ml-1.5 mr-1 hidden sm:block" />
-          <button
-            onClick={() => setLanguage('en')}
-            className={`px-2 py-1 text-xs rounded-lg transition-colors font-medium ${
-              language === 'en' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-600 hover:text-brand-900'
-            }`}
-          >
-            EN
-          </button>
-          <button
-            onClick={() => setLanguage('hi')}
-            className={`px-2 py-1 text-xs rounded-lg transition-colors font-medium ${
-              language === 'hi' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-600 hover:text-brand-900'
-            }`}
-          >
-            हिन्दी
-          </button>
-          <button
-            onClick={() => setLanguage('hinglish')}
-            className={`px-2 py-1 text-xs rounded-lg transition-colors font-medium ${
-              language === 'hinglish' ? 'bg-brand-600 text-white font-semibold' : 'text-slate-600 hover:text-brand-900'
-            }`}
-          >
-            Hinglish
-          </button>
-        </div>
-
         {/* View Mini Shop */}
         <Link
           href="/shop"
